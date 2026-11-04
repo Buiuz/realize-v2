@@ -1,0 +1,2 @@
+ALTER TABLE "origem" ADD COLUMN "vendedor_id" uuid;--> statement-breakpoint
+ALTER TABLE "origem" ADD CONSTRAINT "origem_vendedor_id_usuario_id_fk" FOREIGN KEY ("vendedor_id") REFERENCES "public"."usuario"("id") ON DELETE no action ON UPDATE no action;

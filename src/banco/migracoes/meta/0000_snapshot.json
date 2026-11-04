@@ -1,0 +1,1851 @@
+{
+  "id": "32f669f0-3aa6-4f3f-986e-7a0fbcfdc3ef",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.adicional": {
+      "name": "adicional",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_adicional",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "adicional_tipo_unique": {
+          "name": "adicional_tipo_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "tipo"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.cobranca": {
+      "name": "cobranca",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "fatura_id": {
+          "name": "fatura_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meio": {
+          "name": "meio",
+          "type": "forma_pagamento",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valor_centavos": {
+          "name": "valor_centavos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "status_cobranca",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pendente'"
+        },
+        "cancelada_em": {
+          "name": "cancelada_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cancelada_por": {
+          "name": "cancelada_por",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "motivo_cancelamento": {
+          "name": "motivo_cancelamento",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "cobranca_fatura_id_fatura_id_fk": {
+          "name": "cobranca_fatura_id_fatura_id_fk",
+          "tableFrom": "cobranca",
+          "tableTo": "fatura",
+          "columnsFrom": [
+            "fatura_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "cobranca_valor_nao_negativo": {
+          "name": "cobranca_valor_nao_negativo",
+          "value": "\"cobranca\".\"valor_centavos\" >= 0"
+        },
+        "cobranca_cancelamento_completo": {
+          "name": "cobranca_cancelamento_completo",
+          "value": "(\"cobranca\".\"status\" = 'cancelada') = (num_nonnulls(\"cobranca\".\"cancelada_em\", \"cobranca\".\"cancelada_por\", \"cobranca\".\"motivo_cancelamento\") = 3)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.condicao_especial": {
+      "name": "condicao_especial",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "contrato_id": {
+          "name": "contrato_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_condicao",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "motivo": {
+          "name": "motivo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "autor": {
+          "name": "autor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "aprovador": {
+          "name": "aprovador",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data_fim": {
+          "name": "data_fim",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cancelada_em": {
+          "name": "cancelada_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cancelada_por": {
+          "name": "cancelada_por",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "motivo_cancelamento": {
+          "name": "motivo_cancelamento",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "condicao_especial_contrato_id_contrato_id_fk": {
+          "name": "condicao_especial_contrato_id_contrato_id_fk",
+          "tableFrom": "condicao_especial",
+          "tableTo": "contrato",
+          "columnsFrom": [
+            "contrato_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "condicao_cancelamento_completo": {
+          "name": "condicao_cancelamento_completo",
+          "value": "num_nonnulls(\"condicao_especial\".\"cancelada_em\", \"condicao_especial\".\"cancelada_por\", \"condicao_especial\".\"motivo_cancelamento\") IN (0, 3)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.configuracao": {
+      "name": "configuracao",
+      "schema": "",
+      "columns": {
+        "chave": {
+          "name": "chave",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "valor": {
+          "name": "valor",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "descricao": {
+          "name": "descricao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.contato": {
+      "name": "contato",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "pessoa_id": {
+          "name": "pessoa_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_contato",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valor": {
+          "name": "valor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "principal": {
+          "name": "principal",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "contato_um_principal_por_tipo": {
+          "name": "contato_um_principal_por_tipo",
+          "columns": [
+            {
+              "expression": "pessoa_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "tipo",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"contato\".\"principal\" = true",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "contato_pessoa_id_pessoa_id_fk": {
+          "name": "contato_pessoa_id_pessoa_id_fk",
+          "tableFrom": "contato",
+          "tableTo": "pessoa",
+          "columnsFrom": [
+            "pessoa_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.contrato": {
+      "name": "contrato",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "numero": {
+          "name": "numero",
+          "type": "serial",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "titular_id": {
+          "name": "titular_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "empresa_id": {
+          "name": "empresa_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "origem_id": {
+          "name": "origem_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "status_contrato",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pendente'"
+        },
+        "data_adesao": {
+          "name": "data_adesao",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "contrato_titular_id_pessoa_id_fk": {
+          "name": "contrato_titular_id_pessoa_id_fk",
+          "tableFrom": "contrato",
+          "tableTo": "pessoa",
+          "columnsFrom": [
+            "titular_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "contrato_empresa_id_empresa_id_fk": {
+          "name": "contrato_empresa_id_empresa_id_fk",
+          "tableFrom": "contrato",
+          "tableTo": "empresa",
+          "columnsFrom": [
+            "empresa_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "contrato_origem_id_origem_id_fk": {
+          "name": "contrato_origem_id_origem_id_fk",
+          "tableFrom": "contrato",
+          "tableTo": "origem",
+          "columnsFrom": [
+            "origem_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "contrato_numero_unique": {
+          "name": "contrato_numero_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "numero"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "contrato_titular_ou_empresa": {
+          "name": "contrato_titular_ou_empresa",
+          "value": "num_nonnulls(\"contrato\".\"titular_id\", \"contrato\".\"empresa_id\") = 1"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.empresa": {
+      "name": "empresa",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "cnpj": {
+          "name": "cnpj",
+          "type": "varchar(14)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "razao_social": {
+          "name": "razao_social",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "responsavel": {
+          "name": "responsavel",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "contato": {
+          "name": "contato",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "endereco": {
+          "name": "endereco",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tipo_desconto": {
+          "name": "tipo_desconto",
+          "type": "tipo_desconto",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "valor_desconto": {
+          "name": "valor_desconto",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "empresa_cnpj_unique": {
+          "name": "empresa_cnpj_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "cnpj"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "empresa_cnpj_14_digitos": {
+          "name": "empresa_cnpj_14_digitos",
+          "value": "\"empresa\".\"cnpj\" ~ '^[0-9]{14}$'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.fatura": {
+      "name": "fatura",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "contrato_id": {
+          "name": "contrato_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "competencia": {
+          "name": "competencia",
+          "type": "char(7)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valor_centavos": {
+          "name": "valor_centavos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vencimento": {
+          "name": "vencimento",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "status_fatura",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'a_vencer'"
+        },
+        "paga_em": {
+          "name": "paga_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cancelada_em": {
+          "name": "cancelada_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cancelada_por": {
+          "name": "cancelada_por",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "motivo_cancelamento": {
+          "name": "motivo_cancelamento",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "fatura_uma_valida_por_competencia": {
+          "name": "fatura_uma_valida_por_competencia",
+          "columns": [
+            {
+              "expression": "contrato_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "competencia",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"fatura\".\"status\" <> 'cancelada'",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "fatura_contrato_id_contrato_id_fk": {
+          "name": "fatura_contrato_id_contrato_id_fk",
+          "tableFrom": "fatura",
+          "tableTo": "contrato",
+          "columnsFrom": [
+            "contrato_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "fatura_competencia_valida": {
+          "name": "fatura_competencia_valida",
+          "value": "\"fatura\".\"competencia\" ~ '^[0-9]{4}-(0[1-9]|1[0-2])$'"
+        },
+        "fatura_valor_nao_negativo": {
+          "name": "fatura_valor_nao_negativo",
+          "value": "\"fatura\".\"valor_centavos\" >= 0"
+        },
+        "fatura_cancelamento_completo": {
+          "name": "fatura_cancelamento_completo",
+          "value": "(\"fatura\".\"status\" = 'cancelada') = (num_nonnulls(\"fatura\".\"cancelada_em\", \"fatura\".\"cancelada_por\", \"fatura\".\"motivo_cancelamento\") = 3)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.historico_status": {
+      "name": "historico_status",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "contrato_id": {
+          "name": "contrato_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status_anterior": {
+          "name": "status_anterior",
+          "type": "status_contrato",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "status_novo": {
+          "name": "status_novo",
+          "type": "status_contrato",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data": {
+          "name": "data",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "autor": {
+          "name": "autor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "motivo": {
+          "name": "motivo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "modo": {
+          "name": "modo",
+          "type": "modo_mudanca",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "historico_status_contrato_id_contrato_id_fk": {
+          "name": "historico_status_contrato_id_contrato_id_fk",
+          "tableFrom": "historico_status",
+          "tableTo": "contrato",
+          "columnsFrom": [
+            "contrato_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.lancamento_financeiro": {
+      "name": "lancamento_financeiro",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_lancamento",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valor_centavos": {
+          "name": "valor_centavos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data": {
+          "name": "data",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "conta": {
+          "name": "conta",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "centro_custo": {
+          "name": "centro_custo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "descricao": {
+          "name": "descricao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "fatura_id": {
+          "name": "fatura_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cancelado_em": {
+          "name": "cancelado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cancelado_por": {
+          "name": "cancelado_por",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "motivo_cancelamento": {
+          "name": "motivo_cancelamento",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "lancamento_financeiro_fatura_id_fatura_id_fk": {
+          "name": "lancamento_financeiro_fatura_id_fatura_id_fk",
+          "tableFrom": "lancamento_financeiro",
+          "tableTo": "fatura",
+          "columnsFrom": [
+            "fatura_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "lancamento_valor_positivo": {
+          "name": "lancamento_valor_positivo",
+          "value": "\"lancamento_financeiro\".\"valor_centavos\" > 0"
+        },
+        "lancamento_cancelamento_completo": {
+          "name": "lancamento_cancelamento_completo",
+          "value": "num_nonnulls(\"lancamento_financeiro\".\"cancelado_em\", \"lancamento_financeiro\".\"cancelado_por\", \"lancamento_financeiro\".\"motivo_cancelamento\") IN (0, 3)"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.origem": {
+      "name": "origem",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "tipo": {
+          "name": "tipo",
+          "type": "tipo_origem",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "detalhe": {
+          "name": "detalhe",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.pessoa": {
+      "name": "pessoa",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cpf": {
+          "name": "cpf",
+          "type": "varchar(11)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "data_nascimento": {
+          "name": "data_nascimento",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sexo": {
+          "name": "sexo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "foto_url": {
+          "name": "foto_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cep": {
+          "name": "cep",
+          "type": "varchar(8)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "logradouro": {
+          "name": "logradouro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "numero": {
+          "name": "numero",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "complemento": {
+          "name": "complemento",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "bairro": {
+          "name": "bairro",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cidade": {
+          "name": "cidade",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "uf": {
+          "name": "uf",
+          "type": "char(2)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "pessoa_cpf_unique": {
+          "name": "pessoa_cpf_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "cpf"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "pessoa_cpf_11_digitos": {
+          "name": "pessoa_cpf_11_digitos",
+          "value": "\"pessoa\".\"cpf\" ~ '^[0-9]{11}$'"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.plano": {
+      "name": "plano",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "divulgado": {
+          "name": "divulgado",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "aceita_funeral": {
+          "name": "aceita_funeral",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "plano_nome_unique": {
+          "name": "plano_nome_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "nome"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.plano_forma_pagamento": {
+      "name": "plano_forma_pagamento",
+      "schema": "",
+      "columns": {
+        "plano_id": {
+          "name": "plano_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "forma": {
+          "name": "forma",
+          "type": "forma_pagamento",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "plano_forma_pagamento_plano_id_plano_id_fk": {
+          "name": "plano_forma_pagamento_plano_id_plano_id_fk",
+          "tableFrom": "plano_forma_pagamento",
+          "tableTo": "plano",
+          "columnsFrom": [
+            "plano_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "plano_forma_pagamento_plano_id_forma_pk": {
+          "name": "plano_forma_pagamento_plano_id_forma_pk",
+          "columns": [
+            "plano_id",
+            "forma"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.preco_adicional": {
+      "name": "preco_adicional",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "adicional_id": {
+          "name": "adicional_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "idade_minima": {
+          "name": "idade_minima",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "idade_maxima": {
+          "name": "idade_maxima",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "valor_centavos": {
+          "name": "valor_centavos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "idade_maxima_nova_contratacao": {
+          "name": "idade_maxima_nova_contratacao",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "vigencia_inicio": {
+          "name": "vigencia_inicio",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vigencia_fim": {
+          "name": "vigencia_fim",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "preco_adicional_adicional_id_adicional_id_fk": {
+          "name": "preco_adicional_adicional_id_adicional_id_fk",
+          "tableFrom": "preco_adicional",
+          "tableTo": "adicional",
+          "columnsFrom": [
+            "adicional_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "preco_adicional_valor_nao_negativo": {
+          "name": "preco_adicional_valor_nao_negativo",
+          "value": "\"preco_adicional\".\"valor_centavos\" >= 0"
+        },
+        "preco_adicional_faixa_valida": {
+          "name": "preco_adicional_faixa_valida",
+          "value": "\"preco_adicional\".\"idade_maxima\" IS NULL OR \"preco_adicional\".\"idade_maxima\" >= \"preco_adicional\".\"idade_minima\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.preco_plano": {
+      "name": "preco_plano",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "plano_id": {
+          "name": "plano_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "composicao": {
+          "name": "composicao",
+          "type": "composicao",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valor_centavos": {
+          "name": "valor_centavos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "divulgado": {
+          "name": "divulgado",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "vigencia_inicio": {
+          "name": "vigencia_inicio",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vigencia_fim": {
+          "name": "vigencia_fim",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "preco_plano_plano_id_plano_id_fk": {
+          "name": "preco_plano_plano_id_plano_id_fk",
+          "tableFrom": "preco_plano",
+          "tableTo": "plano",
+          "columnsFrom": [
+            "plano_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "preco_plano_unico_por_vigencia": {
+          "name": "preco_plano_unico_por_vigencia",
+          "nullsNotDistinct": false,
+          "columns": [
+            "plano_id",
+            "composicao",
+            "vigencia_inicio"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "preco_plano_valor_nao_negativo": {
+          "name": "preco_plano_valor_nao_negativo",
+          "value": "\"preco_plano\".\"valor_centavos\" >= 0"
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.versao_adicional": {
+      "name": "versao_adicional",
+      "schema": "",
+      "columns": {
+        "versao_id": {
+          "name": "versao_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "adicional_id": {
+          "name": "adicional_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "versao_adicional_versao_id_versao_contrato_id_fk": {
+          "name": "versao_adicional_versao_id_versao_contrato_id_fk",
+          "tableFrom": "versao_adicional",
+          "tableTo": "versao_contrato",
+          "columnsFrom": [
+            "versao_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "versao_adicional_adicional_id_adicional_id_fk": {
+          "name": "versao_adicional_adicional_id_adicional_id_fk",
+          "tableFrom": "versao_adicional",
+          "tableTo": "adicional",
+          "columnsFrom": [
+            "adicional_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "versao_adicional_versao_id_adicional_id_pk": {
+          "name": "versao_adicional_versao_id_adicional_id_pk",
+          "columns": [
+            "versao_id",
+            "adicional_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.versao_contrato": {
+      "name": "versao_contrato",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "contrato_id": {
+          "name": "contrato_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "numero": {
+          "name": "numero",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "plano_id": {
+          "name": "plano_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "composicao": {
+          "name": "composicao",
+          "type": "composicao",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "forma_pagamento": {
+          "name": "forma_pagamento",
+          "type": "forma_pagamento",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dia_vencimento": {
+          "name": "dia_vencimento",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "valor_mensal_centavos": {
+          "name": "valor_mensal_centavos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vigencia_inicio": {
+          "name": "vigencia_inicio",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "vigencia_fim": {
+          "name": "vigencia_fim",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "motivo": {
+          "name": "motivo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "autor": {
+          "name": "autor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "versao_uma_vigente_por_contrato": {
+          "name": "versao_uma_vigente_por_contrato",
+          "columns": [
+            {
+              "expression": "contrato_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"versao_contrato\".\"vigencia_fim\" IS NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "versao_contrato_contrato_id_contrato_id_fk": {
+          "name": "versao_contrato_contrato_id_contrato_id_fk",
+          "tableFrom": "versao_contrato",
+          "tableTo": "contrato",
+          "columnsFrom": [
+            "contrato_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "versao_contrato_plano_id_plano_id_fk": {
+          "name": "versao_contrato_plano_id_plano_id_fk",
+          "tableFrom": "versao_contrato",
+          "tableTo": "plano",
+          "columnsFrom": [
+            "plano_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "versao_numero_unico_no_contrato": {
+          "name": "versao_numero_unico_no_contrato",
+          "nullsNotDistinct": false,
+          "columns": [
+            "contrato_id",
+            "numero"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {
+        "versao_valor_nao_negativo": {
+          "name": "versao_valor_nao_negativo",
+          "value": "\"versao_contrato\".\"valor_mensal_centavos\" >= 0"
+        },
+        "versao_dia_vencimento_valido": {
+          "name": "versao_dia_vencimento_valido",
+          "value": "\"versao_contrato\".\"dia_vencimento\" BETWEEN 1 AND 31"
+        },
+        "versao_vigencia_valida": {
+          "name": "versao_vigencia_valida",
+          "value": "\"versao_contrato\".\"vigencia_fim\" IS NULL OR \"versao_contrato\".\"vigencia_fim\" >= \"versao_contrato\".\"vigencia_inicio\""
+        }
+      },
+      "isRLSEnabled": false
+    },
+    "public.vida": {
+      "name": "vida",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "contrato_id": {
+          "name": "contrato_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pessoa_id": {
+          "name": "pessoa_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "papel": {
+          "name": "papel",
+          "type": "papel_vida",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "parentesco": {
+          "name": "parentesco",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "data_entrada": {
+          "name": "data_entrada",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data_saida": {
+          "name": "data_saida",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "motivo_saida": {
+          "name": "motivo_saida",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "autor_saida": {
+          "name": "autor_saida",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "carencia_funeral_inicio": {
+          "name": "carencia_funeral_inicio",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "criado_em": {
+          "name": "criado_em",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "vida_pessoa_uma_vez_no_contrato": {
+          "name": "vida_pessoa_uma_vez_no_contrato",
+          "columns": [
+            {
+              "expression": "contrato_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "pessoa_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"vida\".\"data_saida\" IS NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "vida_um_titular_por_contrato": {
+          "name": "vida_um_titular_por_contrato",
+          "columns": [
+            {
+              "expression": "contrato_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "\"vida\".\"papel\" = 'titular' AND \"vida\".\"data_saida\" IS NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "vida_contrato_id_contrato_id_fk": {
+          "name": "vida_contrato_id_contrato_id_fk",
+          "tableFrom": "vida",
+          "tableTo": "contrato",
+          "columnsFrom": [
+            "contrato_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "vida_pessoa_id_pessoa_id_fk": {
+          "name": "vida_pessoa_id_pessoa_id_fk",
+          "tableFrom": "vida",
+          "tableTo": "pessoa",
+          "columnsFrom": [
+            "pessoa_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "vida_dependente_tem_parentesco": {
+          "name": "vida_dependente_tem_parentesco",
+          "value": "\"vida\".\"papel\" = 'titular' OR \"vida\".\"parentesco\" IS NOT NULL"
+        },
+        "vida_saida_tem_motivo_e_autor": {
+          "name": "vida_saida_tem_motivo_e_autor",
+          "value": "\"vida\".\"data_saida\" IS NULL OR (\"vida\".\"motivo_saida\" IS NOT NULL AND \"vida\".\"autor_saida\" IS NOT NULL)"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.composicao": {
+      "name": "composicao",
+      "schema": "public",
+      "values": [
+        "familiar",
+        "individual"
+      ]
+    },
+    "public.forma_pagamento": {
+      "name": "forma_pagamento",
+      "schema": "public",
+      "values": [
+        "cartao_recorrente",
+        "pix_automatico",
+        "carne"
+      ]
+    },
+    "public.modo_mudanca": {
+      "name": "modo_mudanca",
+      "schema": "public",
+      "values": [
+        "manual",
+        "automatico"
+      ]
+    },
+    "public.papel_vida": {
+      "name": "papel_vida",
+      "schema": "public",
+      "values": [
+        "titular",
+        "dependente"
+      ]
+    },
+    "public.status_cobranca": {
+      "name": "status_cobranca",
+      "schema": "public",
+      "values": [
+        "pendente",
+        "paga",
+        "falhou",
+        "cancelada"
+      ]
+    },
+    "public.status_contrato": {
+      "name": "status_contrato",
+      "schema": "public",
+      "values": [
+        "pendente",
+        "ativo",
+        "inadimplente",
+        "bloqueado",
+        "cancelamento_solicitado",
+        "cancelado"
+      ]
+    },
+    "public.status_fatura": {
+      "name": "status_fatura",
+      "schema": "public",
+      "values": [
+        "a_vencer",
+        "vencida",
+        "paga",
+        "cancelada"
+      ]
+    },
+    "public.tipo_adicional": {
+      "name": "tipo_adicional",
+      "schema": "public",
+      "values": [
+        "funeral",
+        "dependente_extra"
+      ]
+    },
+    "public.tipo_condicao": {
+      "name": "tipo_condicao",
+      "schema": "public",
+      "values": [
+        "cortesia",
+        "isencao",
+        "preco_legado"
+      ]
+    },
+    "public.tipo_contato": {
+      "name": "tipo_contato",
+      "schema": "public",
+      "values": [
+        "celular",
+        "telefone",
+        "email"
+      ]
+    },
+    "public.tipo_desconto": {
+      "name": "tipo_desconto",
+      "schema": "public",
+      "values": [
+        "fixo",
+        "percentual",
+        "preco_proprio"
+      ]
+    },
+    "public.tipo_lancamento": {
+      "name": "tipo_lancamento",
+      "schema": "public",
+      "values": [
+        "entrada",
+        "saida"
+      ]
+    },
+    "public.tipo_origem": {
+      "name": "tipo_origem",
+      "schema": "public",
+      "values": [
+        "vendedor",
+        "link",
+        "cupom",
+        "influenciador",
+        "site",
+        "balcao",
+        "reativacao",
+        "migracao"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

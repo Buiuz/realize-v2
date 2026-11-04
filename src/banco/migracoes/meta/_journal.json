@@ -1,0 +1,55 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1793813652633,
+      "tag": "0000_estrutura_inicial",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793813654067,
+      "tag": "0001_protecoes",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793814625121,
+      "tag": "0002_cupom_e_detalhe_de_valor",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793815412177,
+      "tag": "0003_valores_por_vida_e_excecao",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793817715381,
+      "tag": "0004_pagamento_e_assinatura",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793818491605,
+      "tag": "0005_usuarios_sessoes_e_log",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793818577398,
+      "tag": "0006_carteira_do_vendedor",
+      "breakpoints": true
+    }
+  ]
+}
