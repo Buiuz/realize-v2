@@ -68,7 +68,7 @@ export const PERMISSOES = {
   registrar_assinatura: { nome: "Registrar assinatura", perfis: [SA, ADM, ATE] },
   gerar_fatura_teste: { nome: "Gerar fatura de teste", perfis: [SA, ADM, FIN] },
   baixar_fatura: { nome: "Dar baixa em fatura", perfis: [SA, ADM, FIN, ATE] },
-  configurar_prazos: { nome: "Configurar prazos X e Y", perfis: [SA, ADM, FIN] },
+  configurar_prazos: { nome: "Configurar prazo de inadimplência", perfis: [SA, ADM, FIN] },
   rodar_rotina: { nome: "Rodar rotina diária", perfis: [SA, ADM] },
   ver_usuarios: { nome: "Ver usuários e perfis", perfis: [SA, AUD] },
   ver_auditoria: { nome: "Ver log de auditoria", perfis: [SA, AUD] },

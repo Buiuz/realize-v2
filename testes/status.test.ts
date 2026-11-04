@@ -14,12 +14,10 @@ import {
   lerPrazos,
   pagarFatura,
   podeMudar,
-  PRAZO_X,
-  PRAZO_Y,
   registrarAssinatura,
   registrarPagamentoAdesao,
   rodarRotinaDiaria,
-  salvarPrazo,
+  salvarPrazoInadimplencia,
   TRANSICOES,
   type Status,
 } from "../src/regras/status";
@@ -128,11 +126,7 @@ afterAll(async () => {
 beforeEach(async () => {
   // Isola cada teste: a rotina olha todos os contratos do banco.
   await cliente.query("UPDATE contrato SET status = 'cancelado' WHERE status <> 'cancelado'");
-  await cliente.query(
-    "DELETE FROM configuracao WHERE chave IN ('dias_para_inadimplente', 'dias_para_bloqueado')",
-  );
-  await salvarPrazo(db, PRAZO_X, "5");
-  await salvarPrazo(db, PRAZO_Y, "10");
+  await salvarPrazoInadimplencia(db, "5");
 });
 
 describe("transições permitidas", () => {
@@ -255,7 +249,7 @@ describe("rotina: fatura e inadimplência", () => {
   });
 
   it("usa o prazo configurado", async () => {
-    await salvarPrazo(db, PRAZO_X, "20");
+    await salvarPrazoInadimplencia(db, "20");
     const id = await contratoAtivo();
     await criarFaturaTeste(db, id, "2026-11");
     await rodarRotinaDiaria(db, dia("2026-11-29"));
@@ -264,14 +258,28 @@ describe("rotina: fatura e inadimplência", () => {
     expect(await statusDe(id)).toBe("inadimplente");
   });
 
-  it("sem prazo X definido, ninguém muda e a rotina avisa", async () => {
-    await salvarPrazo(db, PRAZO_X, "");
+  it("por padrão, vira Inadimplente no dia seguinte ao vencimento", async () => {
+    await salvarPrazoInadimplencia(db, "");
+    const id = await contratoAtivo();
+    await criarFaturaTeste(db, id, "2026-11"); // vence em 10/11
+    await rodarRotinaDiaria(db, dia("2026-11-10"));
+    expect(await statusDe(id)).toBe("ativo");
+    await rodarRotinaDiaria(db, dia("2026-11-11"));
+    expect(await statusDe(id)).toBe("inadimplente");
+    expect((await faturaDe(id, "2026-11")).status).toBe("vencida");
+    expect(await ultimoHistorico(id)).toMatchObject({
+      status_novo: "inadimplente",
+      motivo: "Fatura venceu e não foi paga",
+    });
+  });
+
+  it("não vira Inadimplente se a fatura foi paga no vencimento", async () => {
+    await salvarPrazoInadimplencia(db, "");
     const id = await contratoAtivo();
     await criarFaturaTeste(db, id, "2026-11");
-    const relatorio = await rodarRotinaDiaria(db, dia("2027-03-01"));
+    await pagarFatura(db, (await faturaDe(id, "2026-11")).id, dia("2026-11-10"));
+    await rodarRotinaDiaria(db, dia("2026-12-01"));
     expect(await statusDe(id)).toBe("ativo");
-    expect((await faturaDe(id, "2026-11")).status).toBe("vencida");
-    expect(relatorio.avisos).toContain("Prazo X não definido: ninguém passa para Inadimplente.");
   });
 
   it("cliente sem fatura não muda de status", async () => {
@@ -348,20 +356,16 @@ describe("regularização", () => {
 });
 
 describe("bloqueio", () => {
-  it("vira Bloqueado exatamente Y dias depois de Inadimplente", async () => {
-    const id = await contratoInadimplente(); // desde 15/11
-    await rodarRotinaDiaria(db, dia("2026-11-24"));
-    expect(await statusDe(id)).toBe("inadimplente");
-    await rodarRotinaDiaria(db, dia("2026-11-25"));
-    expect(await statusDe(id)).toBe("bloqueado");
-    expect(await ultimoHistorico(id)).toMatchObject({ status_anterior: "inadimplente", modo: "automatico" });
-  });
-
-  it("sem prazo Y definido, continua Inadimplente", async () => {
-    await salvarPrazo(db, PRAZO_Y, "");
+  it("a rotina nunca bloqueia: o bloqueio é só manual", async () => {
     const id = await contratoInadimplente();
-    await rodarRotinaDiaria(db, dia("2027-06-01"));
+    await rodarRotinaDiaria(db, dia("2030-01-01"));
     expect(await statusDe(id)).toBe("inadimplente");
+    expect((await executarAcaoManual(db, id, "bloquear", "Decisão da gestão", dia("2030-01-02"))).ok).toBe(true);
+    expect(await ultimoHistorico(id)).toMatchObject({
+      status_anterior: "inadimplente",
+      status_novo: "bloqueado",
+      modo: "manual",
+    });
   });
 
   it("manual exige motivo e registra autor e modo", async () => {
@@ -411,7 +415,7 @@ describe("bloqueio", () => {
 
   it("quitando tudo, volta para Ativo", async () => {
     const id = await contratoInadimplente();
-    await rodarRotinaDiaria(db, dia("2026-11-25"));
+    await executarAcaoManual(db, id, "bloquear", "Teste", dia("2026-11-25"));
     await pagarFatura(db, (await faturaDe(id, "2026-11")).id, dia("2026-11-26"));
     expect(await statusDe(id)).toBe("ativo");
     expect(await ultimoHistorico(id)).toMatchObject({ status_anterior: "bloqueado", status_novo: "ativo" });
@@ -521,14 +525,13 @@ describe("fatura de teste", () => {
 
 describe("prazos configuráveis", () => {
   it("salva, limpa e valida", async () => {
-    expect(await salvarPrazo(db, PRAZO_X, "15")).toEqual({ ok: true });
+    expect(await salvarPrazoInadimplencia(db, "15")).toEqual({ ok: true });
     expect((await lerPrazos(db)).x).toBe(15);
-    expect(await salvarPrazo(db, PRAZO_X, "")).toEqual({ ok: true });
-    expect((await lerPrazos(db)).x).toBeNull();
+    expect(await salvarPrazoInadimplencia(db, "")).toEqual({ ok: true });
+    expect((await lerPrazos(db)).x).toBe(1);
     for (const invalido of ["0", "-3", "abc", "1.5", "366"]) {
-      expect((await salvarPrazo(db, PRAZO_Y, invalido)).ok).toBe(false);
+      expect((await salvarPrazoInadimplencia(db, invalido)).ok).toBe(false);
     }
-    expect((await salvarPrazo(db, "dias_bloqueio_vaga", "1")).ok).toBe(false);
   });
 });
 

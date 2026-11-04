@@ -25,11 +25,11 @@ async function Conteudo() {
     <>
       {podePrazos ? (
       <section>
-        <h2>Prazos de status</h2>
-        <FormularioPrazos x={prazos.x} y={prazos.y} />
+        <h2>Prazo de inadimplência</h2>
+        <FormularioPrazos x={prazos.x} />
         <p className="detalhe prazos-fixos">
-          Outros prazos em uso, conforme proposta do PRD: {prazos.assinatura} dias para assinar depois do
-          pagamento e {prazos.cancelamento} dias para efetivar um pedido de cancelamento.
+          O bloqueio é sempre manual. Outros prazos em uso, conforme proposta do PRD: {prazos.assinatura} dias
+          para assinar depois do pagamento e {prazos.cancelamento} dias para efetivar um pedido de cancelamento.
         </p>
       </section>
       ) : null}
@@ -37,7 +37,7 @@ async function Conteudo() {
       <section>
         <h2>Rotina diária</h2>
         <p className="detalhe">
-          Vence faturas, muda status pelos prazos e atualiza valores de vagas liberadas. No protótipo, ela
+          Vence faturas, marca contratos como Inadimplentes e atualiza valores de vagas liberadas. No protótipo, ela
           só roda por este botão.
         </p>
         <FormularioRotina hoje={hojeEmSaoPaulo()} />

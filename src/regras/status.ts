@@ -44,8 +44,9 @@ export function podeMudar(de: Status, para: Status) {
   return TRANSICOES[de].includes(para);
 }
 
+// Decisão do Bruno: vencida e não paga, vira Inadimplente no dia seguinte, salvo outro valor configurado.
 export const PRAZO_X = "dias_para_inadimplente";
-export const PRAZO_Y = "dias_para_bloqueado";
+const PRAZO_X_PADRAO = 1;
 const PRAZO_ASSINATURA = "dias_limite_assinatura";
 const PRAZO_CANCELAMENTO = "dias_limite_cancelamento";
 
@@ -199,7 +200,7 @@ export type AcaoManual =
   | "confirmar_cancelamento";
 
 const ACOES_MANUAIS: Record<AcaoManual, { de: Status[]; para: Status }> = {
-  // O PRD permite bloqueio manual sem dizer de onde: vale para quem ainda tem acesso ou está em atraso.
+  // Bloqueio é sempre manual (decisão do Bruno): a rotina diária nunca bloqueia ninguém.
   bloquear: { de: ["ativo", "inadimplente"], para: "bloqueado" },
   negociar: { de: ["bloqueado"], para: "ativo" },
   solicitar_cancelamento: { de: ["ativo"], para: "cancelamento_solicitado" },
@@ -335,21 +336,15 @@ async function lerPrazo(db: LeituraBanco, chave: string): Promise<number | null>
 
 export async function lerPrazos(db: LeituraBanco) {
   return {
-    x: await lerPrazo(db, PRAZO_X),
-    y: await lerPrazo(db, PRAZO_Y),
+    x: (await lerPrazo(db, PRAZO_X)) ?? PRAZO_X_PADRAO,
     assinatura: (await lerPrazo(db, PRAZO_ASSINATURA)) ?? 7,
     cancelamento: (await lerPrazo(db, PRAZO_CANCELAMENTO)) ?? 30,
   };
 }
 
-const DESCRICOES: Record<string, string> = {
-  [PRAZO_X]: "Prazo X: dias com fatura vencida até o contrato ficar Inadimplente",
-  [PRAZO_Y]: "Prazo Y: dias como Inadimplente até o contrato ficar Bloqueado",
-};
-
-/** Vazio significa "ainda não definido": a rotina não aplica aquela mudança. */
-export async function salvarPrazo(db: Banco, chave: string, texto: string): Promise<ResultadoStatus> {
-  if (chave !== PRAZO_X && chave !== PRAZO_Y) return { ok: false, erro: "Prazo inválido" };
+/** Vazio volta ao padrão: Inadimplente no dia seguinte ao vencimento. */
+export async function salvarPrazoInadimplencia(db: Banco, texto: string): Promise<ResultadoStatus> {
+  const chave = PRAZO_X;
   const limpo = texto.trim();
   if (!limpo) {
     await db.delete(configuracao).where(eq(configuracao.chave, chave));
@@ -361,7 +356,7 @@ export async function salvarPrazo(db: Banco, chave: string, texto: string): Prom
   const valor = Number(limpo);
   await db
     .insert(configuracao)
-    .values({ chave, valor, descricao: DESCRICOES[chave] })
+    .values({ chave, valor, descricao: "Dias depois do vencimento até o contrato ficar Inadimplente" })
     .onConflictDoUpdate({ target: configuracao.chave, set: { valor } });
   return { ok: true };
 }
@@ -373,7 +368,6 @@ export type RelatorioRotina = {
   faturasVencidas: number;
   mudancas: { numero: number; de: string; para: string; motivo: string }[];
   valoresAtualizados: number[];
-  avisos: string[];
 };
 
 async function dataUltimaEntrada(db: LeituraBanco, contratoId: string, status: Status) {
@@ -410,10 +404,7 @@ export async function rodarRotinaDiaria(db: Banco, agora = new Date()): Promise<
     faturasVencidas: 0,
     mudancas: [],
     valoresAtualizados: [],
-    avisos: [],
   };
-  if (prazos.x === null) relatorio.avisos.push("Prazo X não definido: ninguém passa para Inadimplente.");
-  if (prazos.y === null) relatorio.avisos.push("Prazo Y não definido: ninguém passa para Bloqueado.");
 
   // 1. Fatura que passou do vencimento vira "vencida".
   const vencidas = await db
@@ -450,7 +441,7 @@ export async function rodarRotinaDiaria(db: Banco, agora = new Date()): Promise<
       }
     } else if (c.status === "ativo") {
       // 3. Cliente sem fatura vencida, ou em cortesia, não muda de status.
-      if (prazos.x === null || (await temCondicaoEspecial(db, c.id, hoje))) continue;
+      if (await temCondicaoEspecial(db, c.id, hoje)) continue;
       const [maisAntiga] = await db
         .select({ vencimento: fatura.vencimento })
         .from(fatura)
@@ -458,17 +449,10 @@ export async function rodarRotinaDiaria(db: Banco, agora = new Date()): Promise<
         .orderBy(asc(fatura.vencimento))
         .limit(1);
       if (maisAntiga && diasEntre(maisAntiga.vencimento, hoje) >= prazos.x) {
-        await aplicar(c, "inadimplente", `Fatura vencida há ${prazos.x} dias ou mais`);
-      }
-    } else if (c.status === "inadimplente") {
-      // 4. Tempo demais como Inadimplente.
-      if (prazos.y === null || (await temCondicaoEspecial(db, c.id, hoje))) continue;
-      const desde = await dataUltimaEntrada(db, c.id, "inadimplente");
-      if (desde && diasEntre(desde, hoje) >= prazos.y) {
-        await aplicar(c, "bloqueado", `Inadimplente há ${prazos.y} dias ou mais`);
+        await aplicar(c, "inadimplente", "Fatura venceu e não foi paga");
       }
     } else if (c.status === "cancelamento_solicitado") {
-      // 5. Pedido de cancelamento sem decisão no prazo.
+      // 4. Pedido de cancelamento sem decisão no prazo.
       const desde = await dataUltimaEntrada(db, c.id, "cancelamento_solicitado");
       if (desde && diasEntre(desde, hoje) >= prazos.cancelamento) {
         await aplicar(c, "cancelado", `${prazos.cancelamento} dias desde o pedido de cancelamento`);
@@ -476,7 +460,7 @@ export async function rodarRotinaDiaria(db: Banco, agora = new Date()): Promise<
     }
   }
 
-  // 6. Vaga que liberou: o dependente extra deixa de pagar.
+  // 5. Vaga que liberou: o dependente extra deixa de pagar.
   const ativos = await db
     .select({ id: contrato.id, numero: contrato.numero })
     .from(contrato)

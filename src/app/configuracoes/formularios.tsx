@@ -21,44 +21,23 @@ function enviarSemLimpar(acao: (dados: FormData) => void) {
   };
 }
 
-export function FormularioPrazos({ x, y }: { x: number | null; y: number | null }) {
+export function FormularioPrazos({ x }: { x: number }) {
   const [estado, enviar, salvando] = useActionState(acaoSalvarPrazos, INICIAL);
-  const [valorX, setValorX] = useState(x === null ? "" : String(x));
-  const [valorY, setValorY] = useState(y === null ? "" : String(y));
+  const [valorX, setValorX] = useState(String(x));
   return (
     <form onSubmit={enviarSemLimpar(enviar)} className="formulario" noValidate>
-      <div className="campos-lado-a-lado">
-        <div className="campo">
-          <label htmlFor="x">Prazo X: de fatura vencida até Inadimplente (dias)</label>
-          <input
-            id="x"
-            name="x"
-            inputMode="numeric"
-            placeholder="Ainda não definido"
-            value={valorX}
-            onChange={(e) => setValorX(e.target.value)}
-          />
-        </div>
-        <div className="campo">
-          <label htmlFor="y">Prazo Y: de Inadimplente até Bloqueado (dias)</label>
-          <input
-            id="y"
-            name="y"
-            inputMode="numeric"
-            placeholder="Ainda não definido"
-            value={valorY}
-            onChange={(e) => setValorY(e.target.value)}
-          />
-        </div>
+      <div className="campo">
+        <label htmlFor="x">Dias depois do vencimento até o contrato ficar Inadimplente</label>
+        <input id="x" name="x" inputMode="numeric" value={valorX} onChange={(e) => setValorX(e.target.value)} />
+        <p className="dica-campo">
+          Com 1, a conta que vence sem pagamento deixa o contrato Inadimplente no dia seguinte. Vazio volta para 1.
+        </p>
       </div>
-      <p className="dica-campo">
-        Deixe vazio enquanto o prazo não estiver definido: a rotina não aplica essa mudança.
-      </p>
       {estado.erro ? <p className="erro-campo">{estado.erro}</p> : null}
-      {estado.ok ? <p className="sucesso">Prazos salvos.</p> : null}
+      {estado.ok ? <p className="sucesso">Prazo salvo.</p> : null}
       <div className="acoes">
         <button type="submit" className="botao" disabled={salvando}>
-          {salvando ? "Salvando…" : "Salvar prazos"}
+          {salvando ? "Salvando…" : "Salvar prazo"}
         </button>
       </div>
     </form>
@@ -102,11 +81,6 @@ export function FormularioRotina({ hoje }: { hoje: string }) {
           {relatorio.valoresAtualizados.map((numero) => (
             <p key={numero} className="dica-campo">
               Contrato nº {numero}: vaga liberada, e o valor foi atualizado.
-            </p>
-          ))}
-          {relatorio.avisos.map((aviso) => (
-            <p key={aviso} className="erro-campo">
-              {aviso}
             </p>
           ))}
         </div>

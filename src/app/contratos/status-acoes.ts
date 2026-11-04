@@ -10,10 +10,8 @@ import {
   registrarAssinatura,
   registrarPagamentoAdesao,
   rodarRotinaDiaria,
-  salvarPrazo,
+  salvarPrazoInadimplencia,
   PERMISSAO_DA_ACAO,
-  PRAZO_X,
-  PRAZO_Y,
   type AcaoManual,
   type RelatorioRotina,
 } from "@/regras/status";
@@ -95,19 +93,15 @@ export async function acaoSalvarPrazos(_anterior: EstadoStatus, formulario: Form
   const acesso = await autorizar("configurar_prazos", "configuracao");
   if (!acesso.ok) return { erro: acesso.erro };
 
-  const db = obterBanco();
   const valorX = texto(formulario, "x");
-  const valorY = texto(formulario, "y");
-  const x = await salvarPrazo(db, PRAZO_X, valorX);
-  if (!x.ok) return { erro: `Prazo X: ${x.erro}` };
-  const y = await salvarPrazo(db, PRAZO_Y, valorY);
-  if (!y.ok) return { erro: `Prazo Y: ${y.erro}` };
+  const resultado = await salvarPrazoInadimplencia(obterBanco(), valorX);
+  if (!resultado.ok) return { erro: resultado.erro };
   await registrarAcao(
     acesso.usuario,
-    "Prazos de status alterados",
+    "Prazo de inadimplência alterado",
     "configuracao",
     null,
-    `X: ${valorX || "vazio"}, Y: ${valorY || "vazio"}`,
+    `Dias: ${valorX || "padrão"}`,
   );
   revalidatePath("/configuracoes");
   return { ok: true };
